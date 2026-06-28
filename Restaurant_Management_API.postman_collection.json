@@ -1,0 +1,649 @@
+{
+  "info": {
+    "name": "Restaurant Management System API",
+    "description": "Complete API collection for Restaurant Management System with 4 user roles",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Sign In",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"super@admin.com\",\n  \"password\": \"password123\",\n  \"redirect\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/callback/credentials",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "callback", "credentials"]
+            }
+          }
+        },
+        {
+          "name": "Sign Up (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Customer\",\n  \"email\": \"newcustomer@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"customer\",\n  \"phone\": \"+1 234 567 8900\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "signup"]
+            }
+          }
+        },
+        {
+          "name": "Get Session",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/auth/session",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "session"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Database Setup",
+      "item": [
+        {
+          "name": "Initialize Database",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/seed",
+              "host": ["{{base_url}}"],
+              "path": ["api", "seed"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Restaurants",
+      "item": [
+        {
+          "name": "Get All Restaurants",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/restaurants?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "restaurants"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Single Restaurant",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/restaurants/RESTAURANT_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api", "restaurants", "RESTAURANT_ID"]
+            }
+          }
+        },
+        {
+          "name": "Create Restaurant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Restaurant\",\n  \"email\": \"restaurant@example.com\",\n  \"phone\": \"+1 234 567 8900\",\n  \"address\": {\n    \"street\": \"456 Restaurant Ave\",\n    \"city\": \"Los Angeles\",\n    \"state\": \"CA\",\n    \"zipCode\": \"90001\",\n    \"country\": \"USA\"\n  },\n  \"cuisine\": [\"Italian\", \"American\"],\n  \"description\": \"A great restaurant\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/restaurants",
+              "host": ["{{base_url}}"],
+              "path": ["api", "restaurants"]
+            }
+          }
+        },
+        {
+          "name": "Update Restaurant",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Restaurant Name\",\n  \"phone\": \"+1 234 567 8901\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/restaurants/RESTAURANT_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api", "restaurants", "RESTAURANT_ID"]
+            }
+          }
+        },
+        {
+          "name": "Delete Restaurant",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/api/restaurants/RESTAURANT_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api", "restaurants", "RESTAURANT_ID"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "Get All Subscriptions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/subscriptions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "subscriptions"]
+            }
+          }
+        },
+        {
+          "name": "Create Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Enterprise\",\n  \"description\": \"For large restaurant chains\",\n  \"price\": 299,\n  \"billingPeriod\": \"monthly\",\n  \"features\": {\n    \"maxRestaurants\": -1,\n    \"maxStaffPerRestaurant\": -1,\n    \"maxOrdersPerMonth\": -1,\n    \"storageGB\": 200,\n    \"features\": [\n      \"All features\",\n      \"Unlimited everything\",\n      \"Dedicated support\"\n    ]\n  },\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/subscriptions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "subscriptions"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users/USER_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "USER_ID"]
+            }
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Staff\",\n  \"email\": \"newstaff@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"staff\",\n  \"phone\": \"+1 234 567 8900\",\n  \"restaurantId\": \"RESTAURANT_ID\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"+1 234 567 8901\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/USER_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "USER_ID"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/api/users/USER_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "USER_ID"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Menu Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/menu-categories?restaurantId=RESTAURANT_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu-categories"],
+              "query": [
+                {
+                  "key": "restaurantId",
+                  "value": "RESTAURANT_ID"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"restaurantId\": \"RESTAURANT_ID\",\n  \"name\": \"New Category\",\n  \"description\": \"Category description\",\n  \"isActive\": true,\n  \"sortOrder\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/menu-categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu-categories"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Menu Items",
+      "item": [
+        {
+          "name": "Get All Menu Items",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/menu-items?restaurantId=RESTAURANT_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu-items"],
+              "query": [
+                {
+                  "key": "restaurantId",
+                  "value": "RESTAURANT_ID"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Menu Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"restaurantId\": \"RESTAURANT_ID\",\n  \"categoryId\": \"CATEGORY_ID\",\n  \"name\": \"New Dish\",\n  \"description\": \"Delicious new dish\",\n  \"price\": 19.99,\n  \"isAvailable\": true,\n  \"isVegetarian\": false,\n  \"isVegan\": false,\n  \"isGlutenFree\": false,\n  \"spiceLevel\": \"Medium\",\n  \"preparationTime\": 15,\n  \"sortOrder\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/menu-items",
+              "host": ["{{base_url}}"],
+              "path": ["api", "menu-items"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tables",
+      "item": [
+        {
+          "name": "Get All Tables",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/tables?restaurantId=RESTAURANT_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tables"],
+              "query": [
+                {
+                  "key": "restaurantId",
+                  "value": "RESTAURANT_ID"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Table",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"restaurantId\": \"RESTAURANT_ID\",\n  \"tableNumber\": \"T11\",\n  \"capacity\": 4,\n  \"status\": \"available\",\n  \"location\": \"Indoor\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tables",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tables"]
+            }
+          }
+        },
+        {
+          "name": "Update Table Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"occupied\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/tables/TABLE_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tables", "TABLE_ID"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/orders?restaurantId=RESTAURANT_ID&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders"],
+              "query": [
+                {
+                  "key": "restaurantId",
+                  "value": "RESTAURANT_ID"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Single Order",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/orders/ORDER_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders", "ORDER_ID"]
+            }
+          }
+        },
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"restaurantId\": \"RESTAURANT_ID\",\n  \"customerId\": \"CUSTOMER_ID\",\n  \"orderType\": \"dine_in\",\n  \"items\": [\n    {\n      \"menuItemId\": \"MENU_ITEM_ID\",\n      \"name\": \"Margherita Pizza\",\n      \"quantity\": 2,\n      \"price\": 14.99,\n      \"total\": 29.98\n    }\n  ],\n  \"subtotal\": 29.98,\n  \"tax\": 2.55,\n  \"total\": 32.53,\n  \"paymentMethod\": \"card\",\n  \"paymentStatus\": \"pending\",\n  \"status\": \"pending\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/orders",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"preparing\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/orders/ORDER_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders", "ORDER_ID"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Get All Transactions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/transactions?restaurantId=RESTAURANT_ID&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions"],
+              "query": [
+                {
+                  "key": "restaurantId",
+                  "value": "RESTAURANT_ID"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"restaurantId\": \"RESTAURANT_ID\",\n  \"orderId\": \"ORDER_ID\",\n  \"amount\": 32.53,\n  \"paymentMethod\": \"card\",\n  \"status\": \"completed\",\n  \"transactionId\": \"TXN_123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Staff",
+      "item": [
+        {
+          "name": "Get All Staff",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/staff?restaurantId=RESTAURANT_ID",
+              "host": ["{{base_url}}"],
+              "path": ["api", "staff"],
+              "query": [
+                {
+                  "key": "restaurantId",
+                  "value": "RESTAURANT_ID"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Staff",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"USER_ID\",\n  \"restaurantId\": \"RESTAURANT_ID\",\n  \"employeeId\": \"EMP002\",\n  \"position\": \"Chef\",\n  \"department\": \"kitchen\",\n  \"hireDate\": \"2024-01-15\",\n  \"isActive\": true,\n  \"permissions\": {\n    \"canManageMenu\": true,\n    \"canManageOrders\": true,\n    \"canManageStaff\": false,\n    \"canViewReports\": true,\n    \"canProcessPayments\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/staff",
+              "host": ["{{base_url}}"],
+              "path": ["api", "staff"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
