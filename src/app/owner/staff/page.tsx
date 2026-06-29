@@ -2,7 +2,27 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Staff from '@/models/Staff'
+import Restaurant from '@/models/Restaurant'
 import OwnerStaffManager from '@/components/owner/OwnerStaffManager'
+
+async function getRestaurantIdForOwner(session: any): Promise<string | null> {
+  await connectDB()
+  
+  // If session has restaurantId, use it
+  if (session?.user?.restaurantId) {
+    return session.user.restaurantId
+  }
+  
+  // Fallback: look up restaurant by ownerId
+  if (session?.user?.id) {
+    const restaurant = await Restaurant.findOne({ ownerId: session.user.id })
+    if (restaurant) {
+      return restaurant._id.toString()
+    }
+  }
+  
+  return null
+}
 
 async function getStaffMembers(restaurantId: string) {
   await connectDB()
@@ -14,12 +34,19 @@ async function getStaffMembers(restaurantId: string) {
 
 export default async function OwnerStaff() {
   const session = await getServerSession(authOptions)
-
-  if (!session?.user?.restaurantId) {
-    return <div>No restaurant assigned</div>
+  
+  const restaurantId = await getRestaurantIdForOwner(session)
+  
+  if (!restaurantId) {
+    return (
+      <div className="bg-white rounded-lg shadow p-12 text-center">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No restaurant assigned</h3>
+        <p className="text-gray-600 mb-4">Please log out and log back in, or contact your administrator.</p>
+      </div>
+    )
   }
 
-  const staffMembers = await getStaffMembers(session.user.restaurantId)
+  const staffMembers = await getStaffMembers(restaurantId)
 
   return (
     <OwnerStaffManager

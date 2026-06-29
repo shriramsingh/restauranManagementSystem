@@ -4,24 +4,29 @@ import connectDB from '@/lib/mongodb'
 import MenuCategory from '@/models/MenuCategory'
 import MenuItem from '@/models/MenuItem'
 import OwnerMenuManager from '@/components/owner/OwnerMenuManager'
+import { getRestaurantIdForOwner } from '@/lib/get-restaurant-id'
 
 async function getMenuData(restaurantId: string) {
   await connectDB()
-
   const categories = await MenuCategory.find({ restaurantId }).sort({ sortOrder: 1 })
   const menuItems = await MenuItem.find({ restaurantId }).sort({ sortOrder: 1 })
-
   return { categories, menuItems }
 }
 
 export default async function OwnerMenu() {
   const session = await getServerSession(authOptions)
+  const restaurantId = await getRestaurantIdForOwner()
 
-  if (!session?.user?.restaurantId) {
-    return <div>No restaurant assigned</div>
+  if (!restaurantId) {
+    return (
+      <div className="bg-white rounded-lg shadow p-12 text-center">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No restaurant assigned</h3>
+        <p className="text-gray-600 mb-4">Please log out and log back in to refresh your session.</p>
+      </div>
+    )
   }
 
-  const { categories, menuItems } = await getMenuData(session.user.restaurantId)
+  const { categories, menuItems } = await getMenuData(restaurantId)
 
   return (
     <OwnerMenuManager

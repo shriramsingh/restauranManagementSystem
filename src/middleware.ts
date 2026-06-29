@@ -66,14 +66,24 @@ export async function middleware(request: NextRequest) {
 
   // Role-based access control for API routes
   if (pathname.startsWith('/api/')) {
-    // Only /api/admin is strictly admin-only
+    if (pathname.startsWith('/api/admin') && role !== 'super_admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
     if (
-      pathname.startsWith('/api/admin') &&
-      role !== 'super_admin'
+      pathname.startsWith('/api/owner') &&
+      role !== 'restaurant_owner'
     ) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
-    // All other API routes handle their own authorization internally
+    if (
+      pathname.startsWith('/api/staff') &&
+      !['staff', 'restaurant_owner'].includes(role)
+    ) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    if (pathname.startsWith('/api/customer') && role !== 'customer') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
   }
 
   return NextResponse.next()

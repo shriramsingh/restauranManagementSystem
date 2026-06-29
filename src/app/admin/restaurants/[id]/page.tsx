@@ -72,9 +72,9 @@ export default async function RestaurantDetail({ params }: { params: { id: strin
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Address</h2>
         <p className="text-gray-900">
-          {restaurant.address.street}<br />
-          {restaurant.address.city}, {restaurant.address.state} {restaurant.address.zipCode}<br />
-          {restaurant.address.country}
+          {restaurant.address?.street || 'N/A'}<br />
+          {restaurant.address?.city || 'N/A'}, {restaurant.address?.state || 'N/A'} {restaurant.address?.zipCode || 'N/A'}<br />
+          {restaurant.address?.country || 'N/A'}
         </p>
       </div>
 
@@ -92,11 +92,11 @@ export default async function RestaurantDetail({ params }: { params: { id: strin
           </div>
           <div>
             <p className="text-sm text-gray-600">Start Date</p>
-            <p className="text-gray-900 font-medium">{new Date(restaurant.subscriptionStartDate).toLocaleDateString()}</p>
+            <p className="text-gray-900 font-medium">{restaurant.subscriptionStartDate ? new Date(restaurant.subscriptionStartDate).toLocaleDateString() : 'N/A'}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">End Date</p>
-            <p className="text-gray-900 font-medium">{new Date(restaurant.subscriptionEndDate).toLocaleDateString()}</p>
+            <p className="text-gray-900 font-medium">{restaurant.subscriptionEndDate ? new Date(restaurant.subscriptionEndDate).toLocaleDateString() : 'N/A'}</p>
           </div>
         </div>
       </div>
@@ -107,19 +107,19 @@ export default async function RestaurantDetail({ params }: { params: { id: strin
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <p className="text-sm text-gray-600">Currency</p>
-            <p className="text-gray-900 font-medium">{restaurant.settings.currency}</p>
+            <p className="text-gray-900 font-medium">{restaurant.settings?.currency || 'N/A'}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Tax Rate</p>
-            <p className="text-gray-900 font-medium">{restaurant.settings.taxRate}%</p>
+            <p className="text-gray-900 font-medium">{restaurant.settings?.taxRate ?? 'N/A'}%</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Online Orders</p>
-            <p className="text-gray-900 font-medium">{restaurant.settings.allowOnlineOrders ? 'Enabled' : 'Disabled'}</p>
+            <p className="text-gray-900 font-medium">{restaurant.settings?.allowOnlineOrders ? 'Enabled' : 'Disabled'}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Table Reservation</p>
-            <p className="text-gray-900 font-medium">{restaurant.settings.allowTableReservation ? 'Enabled' : 'Disabled'}</p>
+            <p className="text-gray-900 font-medium">{restaurant.settings?.allowTableReservation ? 'Enabled' : 'Disabled'}</p>
           </div>
         </div>
       </div>

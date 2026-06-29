@@ -2,61 +2,43 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Order from '@/models/Order'
-import Restaurant from '@/models/Restaurant'
 import MenuItem from '@/models/MenuItem'
 import Table from '@/models/Table'
 import { getPeriodComparison, getRevenueComparison } from '@/lib/analytics'
-import { 
-  ShoppingCart, 
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  Users,
-  UtensilsCrossed,
-  Table2
-} from 'lucide-react'
+import { getRestaurantIdForOwner } from '@/lib/get-restaurant-id'
+import { ShoppingCart, DollarSign, TrendingUp, TrendingDown, UtensilsCrossed, Table2 } from 'lucide-react'
 import RevenueAreaChart from '@/components/charts/RevenueAreaChart'
 import OrderStatusPieChart from '@/components/charts/OrderStatusPieChart'
 
 async function getOwnerStats(restaurantId: string) {
   await connectDB()
-  
   const totalOrders = await Order.countDocuments({ restaurantId })
   const totalRevenue = await Order.aggregate([
     { $match: { restaurantId: restaurantId, paymentStatus: 'paid' } },
     { $group: { _id: null, total: { $sum: '$total' } } }
   ])
-  
   const menuItems = await MenuItem.countDocuments({ restaurantId })
   const tables = await Table.countDocuments({ restaurantId })
-  
-  const recentOrders = await Order.find({ restaurantId })
-    .sort({ createdAt: -1 })
-    .limit(50)
-
-  // Real trends
+  const recentOrders = await Order.find({ restaurantId }).sort({ createdAt: -1 }).limit(50)
   const orderTrend = await getPeriodComparison(Order, { restaurantId })
   const revenueTrend = await getRevenueComparison(Order, { restaurantId, paymentStatus: 'paid' })
-
-  return {
-    totalOrders,
-    totalRevenue: totalRevenue[0]?.total || 0,
-    menuItems,
-    tables,
-    recentOrders,
-    orderTrend,
-    revenueTrend,
-  }
+  return { totalOrders, totalRevenue: totalRevenue[0]?.total || 0, menuItems, tables, recentOrders, orderTrend, revenueTrend }
 }
 
 export default async function OwnerDashboard() {
   const session = await getServerSession(authOptions)
-  
-  if (!session?.user?.restaurantId) {
-    return <div>No restaurant assigned</div>
+  const restaurantId = await getRestaurantIdForOwner()
+
+  if (!restaurantId) {
+    return (
+      <div className="bg-white rounded-lg shadow p-12 text-center">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No restaurant assigned</h3>
+        <p className="text-gray-600 mb-4">Please log out and log back in to refresh your session.</p>
+      </div>
+    )
   }
 
-  const stats = await getOwnerStats(session.user.restaurantId)
+  const stats = await getOwnerStats(restaurantId)
 
   const formatChange = (change: number, trend: 'up' | 'down' | 'flat') => {
     const sign = trend === 'up' ? '+' : trend === 'down' ? '' : ''

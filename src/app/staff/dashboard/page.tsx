@@ -3,66 +3,35 @@ import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Order from '@/models/Order'
 import Table from '@/models/Table'
-import { 
-  ShoppingCart, 
-  Clock,
-  CheckCircle,
-  AlertCircle
-} from 'lucide-react'
+import { getRestaurantIdForOwner } from '@/lib/get-restaurant-id'
+import { ShoppingCart, Clock, CheckCircle, AlertCircle } from 'lucide-react'
 
 async function getStaffStats(restaurantId: string) {
   await connectDB()
-  
-  const pendingOrders = await Order.countDocuments({ 
-    restaurantId, 
-    status: 'pending' 
-  })
-  
-  const preparingOrders = await Order.countDocuments({ 
-    restaurantId, 
-    status: 'preparing' 
-  })
-  
-  const readyOrders = await Order.countDocuments({ 
-    restaurantId, 
-    status: 'ready' 
-  })
-  
+  const pendingOrders = await Order.countDocuments({ restaurantId, status: 'pending' })
+  const preparingOrders = await Order.countDocuments({ restaurantId, status: 'preparing' })
+  const readyOrders = await Order.countDocuments({ restaurantId, status: 'ready' })
   const totalOrders = await Order.countDocuments({ restaurantId })
-  
-  const availableTables = await Table.countDocuments({ 
-    restaurantId, 
-    status: 'available' 
-  })
-  
-  const occupiedTables = await Table.countDocuments({ 
-    restaurantId, 
-    status: 'occupied' 
-  })
-
-  const recentOrders = await Order.find({ restaurantId })
-    .sort({ createdAt: -1 })
-    .limit(10)
-
-  return {
-    pendingOrders,
-    preparingOrders,
-    readyOrders,
-    totalOrders,
-    availableTables,
-    occupiedTables,
-    recentOrders,
-  }
+  const availableTables = await Table.countDocuments({ restaurantId, status: 'available' })
+  const occupiedTables = await Table.countDocuments({ restaurantId, status: 'occupied' })
+  const recentOrders = await Order.find({ restaurantId }).sort({ createdAt: -1 }).limit(10)
+  return { pendingOrders, preparingOrders, readyOrders, totalOrders, availableTables, occupiedTables, recentOrders }
 }
 
 export default async function StaffDashboard() {
   const session = await getServerSession(authOptions)
-  
-  if (!session?.user?.restaurantId) {
-    return <div>No restaurant assigned</div>
+  const restaurantId = await getRestaurantIdForOwner()
+
+  if (!restaurantId) {
+    return (
+      <div className="bg-white rounded-lg shadow p-12 text-center">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No restaurant assigned</h3>
+        <p className="text-gray-600 mb-4">Please log out and log back in to refresh your session.</p>
+      </div>
+    )
   }
 
-  const stats = await getStaffStats(session.user.restaurantId)
+  const stats = await getStaffStats(restaurantId)
 
   const statCards = [
     {

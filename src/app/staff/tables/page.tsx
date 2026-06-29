@@ -5,6 +5,7 @@ import Table from '@/models/Table'
 import { Table2 } from 'lucide-react'
 import StaffTableActions from '@/components/staff/StaffTableActions'
 import AutoRefresh from '@/components/AutoRefresh'
+import { getRestaurantIdForOwner } from '@/lib/get-restaurant-id'
 
 async function getStaffTables(restaurantId: string) {
   await connectDB()
@@ -14,12 +15,18 @@ async function getStaffTables(restaurantId: string) {
 
 export default async function StaffTables() {
   const session = await getServerSession(authOptions)
+  const restaurantId = await getRestaurantIdForOwner()
 
-  if (!session?.user?.restaurantId) {
-    return <div>No restaurant assigned</div>
+  if (!restaurantId) {
+    return (
+      <div className="bg-white rounded-lg shadow p-12 text-center">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No restaurant assigned</h3>
+        <p className="text-gray-600 mb-4">Please log out and log back in to refresh your session.</p>
+      </div>
+    )
   }
 
-  const tables = await getStaffTables(session.user.restaurantId)
+  const tables = await getStaffTables(restaurantId)
 
   return (
     <div className="space-y-6">

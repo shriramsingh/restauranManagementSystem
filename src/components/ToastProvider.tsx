@@ -1,6 +1,6 @@
 'use client'
 
-import { Toaster } from '@/lib/sonner-shim'
+import { Toaster } from 'sonner'
 
 export default function ToastProviderWrapper({ children }: { children: React.ReactNode }) {
   return (

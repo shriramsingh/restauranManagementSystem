@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Order from '@/models/Order'
 import OwnerOrdersClient from '@/components/owner/OwnerOrdersClient'
+import { getRestaurantIdForOwner } from '@/lib/get-restaurant-id'
 
 async function getRestaurantOrders(restaurantId: string) {
   await connectDB()
@@ -14,12 +15,18 @@ async function getRestaurantOrders(restaurantId: string) {
 
 export default async function OwnerOrders() {
   const session = await getServerSession(authOptions)
+  const restaurantId = await getRestaurantIdForOwner()
 
-  if (!session?.user?.restaurantId) {
-    return <div>No restaurant assigned</div>
+  if (!restaurantId) {
+    return (
+      <div className="bg-white rounded-lg shadow p-12 text-center">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No restaurant assigned</h3>
+        <p className="text-gray-600 mb-4">Please log out and log back in to refresh your session.</p>
+      </div>
+    )
   }
 
-  const orders = await getRestaurantOrders(session.user.restaurantId)
+  const orders = await getRestaurantOrders(restaurantId)
 
   return (
     <OwnerOrdersClient

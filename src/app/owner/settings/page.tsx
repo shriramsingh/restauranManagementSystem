@@ -3,19 +3,31 @@ import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Restaurant from '@/models/Restaurant'
 import { Settings } from 'lucide-react'
+import { getRestaurantIdForOwner } from '@/lib/get-restaurant-id'
 
 export default async function OwnerSettings() {
   const session = await getServerSession(authOptions)
-  
-  if (!session?.user?.restaurantId) {
-    return <div>No restaurant assigned</div>
+  const restaurantId = await getRestaurantIdForOwner()
+
+  if (!restaurantId) {
+    return (
+      <div className="bg-white rounded-lg shadow p-12 text-center">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No restaurant assigned</h3>
+        <p className="text-gray-600 mb-4">Please log out and log back in to refresh your session.</p>
+      </div>
+    )
   }
 
   await connectDB()
-  const restaurant = await Restaurant.findById(session.user.restaurantId)
+  const restaurant = await Restaurant.findById(restaurantId)
 
   if (!restaurant) {
-    return <div>Restaurant not found</div>
+    return (
+      <div className="bg-white rounded-lg shadow p-12 text-center">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Restaurant not found</h3>
+        <p className="text-gray-600 mb-4">The restaurant data could not be loaded.</p>
+      </div>
+    )
   }
 
   return (

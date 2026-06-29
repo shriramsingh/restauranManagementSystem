@@ -5,6 +5,7 @@ const envSchema = z.object({
   NEXTAUTH_SECRET: z.string().min(32, 'NEXTAUTH_SECRET must be at least 32 characters'),
   NEXTAUTH_URL: z.string().min(1, 'NEXTAUTH_URL is required'),
   NEXT_PUBLIC_APP_URL: z.string().min(1).optional(),
+  REDIS_URL: z.string().min(1).optional(),
 })
 
 export const env = envSchema.parse({
@@ -12,4 +13,5 @@ export const env = envSchema.parse({
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
   NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+  REDIS_URL: process.env.REDIS_URL,
 })
