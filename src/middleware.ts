@@ -8,6 +8,31 @@ const PUBLIC_PAGES = ['/', '/auth/signin', '/auth/signup', '/setup']
 // Public API route prefixes
 const PUBLIC_API_PREFIXES = ['/api/auth/', '/api/seed']
 
+// --- START REFACTORED RBAC LOGIC ---
+
+// Define role types for better type safety
+type UserRole = 'super_admin' | 'restaurant_owner' | 'staff' | 'customer'
+
+// Configuration for page route access control
+const pageRouteRules: Record<string, UserRole[]> = {
+  '/admin': ['super_admin'],
+  '/owner': ['restaurant_owner'],
+  '/staff': ['staff'],
+  '/customer': ['customer'],
+}
+
+// Configuration for API route access control
+const apiRouteRules: Record<string, UserRole[]> = {
+  '/api/admin': ['super_admin'],
+  '/api/owner': ['restaurant_owner'],
+  '/api/staff': ['restaurant_owner', 'staff'],
+  '/api/customer': ['customer'],
+  '/api/menu-categories': ['restaurant_owner'],
+  '/api/menu-items': ['restaurant_owner'],
+}
+
+// --- END REFACTORED RBAC LOGIC ---
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
@@ -45,46 +70,33 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/auth/signin', request.url))
   }
 
+  const role = token.role as UserRole
+
+  // --- START REFACTORED RBAC CHECKS ---
+
   // Role-based access control for page routes
-  const role = token.role as string
-
-  if (pathname.startsWith('/admin') && role !== 'super_admin') {
-    return NextResponse.redirect(new URL('/auth/signin', request.url))
-  }
-
-  if (pathname.startsWith('/owner') && role !== 'restaurant_owner') {
-    return NextResponse.redirect(new URL('/auth/signin', request.url))
-  }
-
-  if (pathname.startsWith('/staff') && role !== 'staff') {
-    return NextResponse.redirect(new URL('/auth/signin', request.url))
-  }
-
-  if (pathname.startsWith('/customer') && role !== 'customer') {
-    return NextResponse.redirect(new URL('/auth/signin', request.url))
+  for (const prefix in pageRouteRules) {
+    if (pathname.startsWith(prefix)) {
+      if (!pageRouteRules[prefix].includes(role)) {
+        return NextResponse.redirect(new URL('/auth/signin', request.url))
+      }
+      break // Match found, no need to check other rules
+    }
   }
 
   // Role-based access control for API routes
   if (pathname.startsWith('/api/')) {
-    if (pathname.startsWith('/api/admin') && role !== 'super_admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-    if (
-      pathname.startsWith('/api/owner') &&
-      role !== 'restaurant_owner'
-    ) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-    if (
-      pathname.startsWith('/api/staff') &&
-      !['staff', 'restaurant_owner'].includes(role)
-    ) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-    if (pathname.startsWith('/api/customer') && role !== 'customer') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    for (const prefix in apiRouteRules) {
+      if (pathname.startsWith(prefix)) {
+        if (!apiRouteRules[prefix].includes(role)) {
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        }
+        break // Match found, no need to check other rules
+      }
     }
   }
+  
+  // --- END REFACTORED RBAC CHECKS ---
 
   return NextResponse.next()
 }

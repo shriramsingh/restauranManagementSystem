@@ -1,9 +1,11 @@
 import mongoose, { Document, Schema } from 'mongoose'
+import slugify from 'slugify'
 
 export interface IMenuItem extends Document {
   restaurantId: mongoose.Types.ObjectId
   categoryId: mongoose.Types.ObjectId
   name: string
+  slug: string
   description?: string
   price: number
   images?: string[]
@@ -42,6 +44,11 @@ const MenuItemSchema = new Schema<IMenuItem>({
     type: String,
     required: true,
     trim: true,
+  },
+  slug: {
+    type: String,
+    required: true,
+    lowercase: true,
   },
   description: {
     type: String,
@@ -105,6 +112,14 @@ const MenuItemSchema = new Schema<IMenuItem>({
   timestamps: true,
 })
 
+MenuItemSchema.pre('save', function (next) {
+  if (this.isModified('name')) {
+    this.slug = slugify(this.name, { lower: true, strict: true })
+  }
+  next()
+})
+
+MenuItemSchema.index({ restaurantId: 1, slug: 1 }, { unique: true })
 MenuItemSchema.index({ restaurantId: 1, categoryId: 1, sortOrder: 1 })
 MenuItemSchema.index({ isAvailable: 1 })
 MenuItemSchema.index({ isFeatured: 1 })

@@ -1,7 +1,9 @@
 import mongoose, { Document, Schema } from 'mongoose'
+import slugify from 'slugify'
 
 export interface IRestaurant extends Document {
   name: string
+  slug: string
   ownerId: mongoose.Types.ObjectId
   email: string
   phone: string
@@ -44,6 +46,12 @@ const RestaurantSchema = new Schema<IRestaurant>({
     type: String,
     required: true,
     trim: true,
+  },
+  slug: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
   },
   ownerId: {
     type: Schema.Types.ObjectId,
@@ -122,6 +130,14 @@ const RestaurantSchema = new Schema<IRestaurant>({
 }, {
   timestamps: true,
 })
+
+RestaurantSchema.pre('save', function (next) {
+  if (this.isModified('name')) {
+    this.slug = slugify(this.name, { lower: true, strict: true })
+  }
+  next()
+})
+
 
 RestaurantSchema.index({ ownerId: 1 })
 RestaurantSchema.index({ subscriptionId: 1 })

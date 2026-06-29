@@ -14,7 +14,7 @@ export default function OrderStatusPieChart({ orders }: { orders: any[] }) {
   const data = useMemo(() => {
     const counts: Record<string, number> = {}
     orders.forEach((o) => {
-      const status = o.status || 'unknown'
+      const status = o.paymentStatus === 'refunded' ? 'refunded' : o.status || 'unknown'
       counts[status] = (counts[status] || 0) + 1
     })
 
@@ -26,6 +26,7 @@ export default function OrderStatusPieChart({ orders }: { orders: any[] }) {
       served: '#10B981',
       completed: '#059669',
       cancelled: '#EF4444',
+      refunded: '#9CA3AF'
     }
 
     return Object.entries(counts).map(([name, value]) => ({

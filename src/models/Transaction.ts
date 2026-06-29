@@ -1,78 +1,37 @@
-import mongoose, { Document, Schema } from 'mongoose'
+import { Schema, model, models, Document } from 'mongoose'
 
 export interface ITransaction extends Document {
-  restaurantId: mongoose.Types.ObjectId
-  orderId: mongoose.Types.ObjectId
-  transactionId: string
-  type: 'payment' | 'refund' | 'subscription' | 'refund_subscription'
+  restaurantId: Schema.Types.ObjectId
+  orderId: Schema.Types.ObjectId
   amount: number
-  currency: string
-  paymentMethod: 'cash' | 'card' | 'online' | 'wallet'
-  paymentStatus: 'success' | 'failed' | 'pending' | 'refunded'
-  gatewayResponse?: {
-    gateway: string
-    transactionId: string
-    status: string
-    message?: string
-  }
-  createdAt: Date
-  updatedAt: Date
+  type: 'sale' | 'refund'
+  paymentMethod: string
+  transactionId: string
+  status: 'completed' | 'pending' | 'failed'
 }
 
-const TransactionSchema = new Schema<ITransaction>({
-  restaurantId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Restaurant',
-    required: true,
+const TransactionSchema = new Schema(
+  {
+    restaurantId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Restaurant',
+      required: true,
+    },
+    orderId: { type: Schema.Types.ObjectId, ref: 'Order', required: true },
+    amount: { type: Number, required: true },
+    type: { type: String, enum: ['sale', 'refund'], required: true },
+    paymentMethod: { type: String, required: true },
+    transactionId: { type: String, required: true, unique: true },
+    status: {
+      type: String,
+      enum: ['completed', 'pending', 'failed'],
+      required: true,
+    },
   },
-  orderId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Order',
-    required: true,
-  },
-  transactionId: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  type: {
-    type: String,
-    enum: ['payment', 'refund', 'subscription', 'refund_subscription'],
-    required: true,
-  },
-  amount: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  currency: {
-    type: String,
-    required: true,
-    default: 'USD',
-  },
-  paymentMethod: {
-    type: String,
-    enum: ['cash', 'card', 'online', 'wallet'],
-    required: true,
-  },
-  paymentStatus: {
-    type: String,
-    enum: ['success', 'failed', 'pending', 'refunded'],
-    required: true,
-    default: 'pending',
-  },
-  gatewayResponse: {
-    gateway: { type: String },
-    transactionId: { type: String },
-    status: { type: String },
-    message: { type: String },
-  },
-}, {
-  timestamps: true,
-})
+  { timestamps: true },
+)
 
-TransactionSchema.index({ restaurantId: 1, createdAt: -1 })
-TransactionSchema.index({ transactionId: 1 }, { unique: true })
-TransactionSchema.index({ paymentStatus: 1 })
+const Transaction =
+  models.Transaction || model<ITransaction>('Transaction', TransactionSchema)
 
-export default mongoose.models.Transaction || mongoose.model<ITransaction>('Transaction', TransactionSchema)
+export default Transaction

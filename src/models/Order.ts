@@ -28,6 +28,7 @@ export interface IOrder extends Document {
   notes?: string
   preparedBy?: mongoose.Types.ObjectId
   servedBy?: mongoose.Types.ObjectId
+  transactions: mongoose.Types.ObjectId[]
   createdAt: Date
   updatedAt: Date
 }
@@ -149,6 +150,7 @@ const OrderSchema = new Schema<IOrder>({
     type: Schema.Types.ObjectId,
     ref: 'User',
   },
+  transactions: [{ type: Schema.Types.ObjectId, ref: 'Transaction' }],
 }, {
   timestamps: true,
 })

@@ -105,7 +105,7 @@ export default function OwnerOrdersClient({ initialOrders }: { initialOrders: Or
     setError('')
     try {
       const res = await fetch(`/api/orders/${orderId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ paymentStatus: newPaymentStatus }),
       })
