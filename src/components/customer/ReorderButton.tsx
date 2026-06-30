@@ -17,8 +17,8 @@ interface ReorderButtonProps {
   currency: string
 }
 
-export default function ReorderButton({ items, currency }: ReorderButtonProps) {
-  const { addItem } = useCart()
+export default function ReorderButton({ items }: ReorderButtonProps) {
+  const { addItems } = useCart()
 
   const handleReorder = () => {
     if (!items || items.length === 0) {
@@ -27,21 +27,14 @@ export default function ReorderButton({ items, currency }: ReorderButtonProps) {
     }
 
     try {
-      // The custom CartProvider's addItem expects a quantity property on the item object,
-      // even if its TypeScript type suggests otherwise. We map the order items to the 
-      // format expected by the cart.
-      items.forEach(orderItem => {
-        const cartItem = {
-          id: orderItem.menuItemId,
-          name: orderItem.name,
-          price: orderItem.price,
-          currency: currency,
-          quantity: orderItem.quantity,
-        }
-        // The use-shopping-cart addItem function is wrapped in our CartProvider.
-        // It takes the item and an options object, where we specify the quantity.
-        addItem(cartItem)
-      })
+      const itemsToAdd = items.map(item => ({
+        menuItemId: item.menuItemId,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+      }))
+      
+      addItems(itemsToAdd)
 
       toast.success(`${items.length} item(s) have been added to your cart!`)
     } catch (error) {

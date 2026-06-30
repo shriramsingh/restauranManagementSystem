@@ -1,5 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Order from '@/models/Order'
@@ -13,11 +14,11 @@ import {
   XCircle,
   Bike,
   Truck,
+  Printer,
 } from 'lucide-react'
 
 import ReorderButton from '@/components/customer/ReorderButton'
 
-// It's recommended to move these configs to a shared file (e.g., in /lib) if they are used in multiple places.
 const statusConfig: Record<string, { icon: any; color: string; bg: string; label: string }> = {
     pending: { icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-50', label: 'Order Received' },
     confirmed: { icon: CheckCircle, color: 'text-blue-600', bg: 'bg-blue-50', label: 'Confirmed' },
@@ -45,41 +46,39 @@ const orderTypeStatusFlows = {
     },
 }
 
-async function getOrderDetails(orderId: string, customerId: string, restaurantId: string) {
+async function getOrderDetails(orderId: string, customerId: string) {
   await connectDB()
   
   const order = await Order.findOne({ 
     _id: orderId, 
     customerId 
+  }).populate({
+    path: 'restaurantId',
+    select: 'name settings.currency',
+    model: Restaurant,
   }).lean()
 
   if (!order) {
     return null
   }
 
-  const restaurant = await Restaurant.findById(restaurantId).select('settings.currency').lean();
-
-  return {
-    order: JSON.parse(JSON.stringify(order)), // Serialize to plain object
-    currency: restaurant?.settings?.currency || '$',
-  }
+  return JSON.parse(JSON.stringify(order))
 }
 
 export default async function OrderDetailsPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user?.id) {
-    // This should ideally be handled by the layout, but as a safeguard:
     return notFound()
   }
 
-  const data = await getOrderDetails(params.id, session.user.id, session.user.restaurantId)
+  const order = await getOrderDetails(params.id, session.user.id)
 
-  if (!data) {
+  if (!order) {
     return notFound()
   }
 
-  const { order, currency } = data
+  const currency = order.restaurantId?.settings?.currency || '₹'
   const config = statusConfig[order.status] || statusConfig.pending
   const Icon = config.icon
   const flow = orderTypeStatusFlows[order.orderType as keyof typeof orderTypeStatusFlows] || orderTypeStatusFlows.dine_in
@@ -101,17 +100,29 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start mb-6 border-b pb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Order #{order.orderNumber}</h1>
           <p className="text-sm text-gray-500 mt-1">
+            From: <span className="font-medium text-gray-700">{order.restaurantId.name}</span>
+          </p>
+          <p className="text-sm text-gray-500">
             <FormattedDate date={order.createdAt} /> &middot;{' '}
             <span className="capitalize">{order.orderType.replace('_', ' ')}</span>
           </p>
         </div>
-        <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${config.bg} mt-4 md:mt-0`}>
-          <Icon size={16} className={config.color} />
-          <span className={`text-sm font-medium ${config.color}`}>{config.label}</span>
+        <div className="flex flex-col items-end gap-4 mt-4 md:mt-0">
+            <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${config.bg}`}>
+            <Icon size={16} className={config.color} />
+            <span className={`text-sm font-medium ${config.color}`}>{config.label}</span>
+            </div>
+            <Link
+                href={`/customer/orders/${order._id}/receipt`}
+                className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+            >
+                <Printer size={16} className="mr-2" />
+                Print Receipt
+            </Link>
         </div>
       </div>
 
@@ -148,21 +159,41 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
       {/* Order Items */}
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-gray-800 mb-3">Order Summary</h2>
-        <div className="divide-y divide-gray-200 border border-gray-200 rounded-lg">
-          {order.items.map((item: any, idx: number) => (
-            <div key={idx} className="flex justify-between items-center p-4">
-              <div>
-                <p className="font-medium text-gray-800">{item.name}</p>
-                <p className="text-sm text-gray-600">
-                  {item.quantity} x {currency}{item.price.toFixed(2)}
-                </p>
+        <div className="border border-gray-200 rounded-lg">
+          <div className="divide-y divide-gray-200">
+            {order.items.map((item: any, idx: number) => (
+              <div key={idx} className="flex justify-between items-center p-4">
+                <div>
+                  <p className="font-medium text-gray-800">{item.name}</p>
+                  <p className="text-sm text-gray-600">
+                    {item.quantity} x {currency}{item.price.toFixed(2)}
+                  </p>
+                </div>
+                <p className="text-gray-900 font-semibold">{currency}{item.total.toFixed(2)}</p>
               </div>
-              <p className="text-gray-900 font-semibold">{currency}{item.total.toFixed(2)}</p>
+            ))}
+          </div>
+          <div className="p-4 bg-gray-50 border-t">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-gray-600">Subtotal</span>
+              <span className="font-medium text-gray-800">{currency}{order.subtotal.toFixed(2)}</span>
             </div>
-          ))}
-          <div className="flex justify-between items-center p-4 bg-gray-50">
-            <span className="font-semibold text-gray-900 text-lg">Total</span>
-            <span className="font-bold text-blue-600 text-xl">{currency}{order.total.toFixed(2)}</span>
+            {order.tax > 0 && (
+                 <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-600">Tax</span>
+                    <span className="font-medium text-gray-800">{currency}{order.tax.toFixed(2)}</span>
+                </div>
+            )}
+            {order.discount > 0 && (
+                <div className="flex justify-between items-center mb-2 text-green-600">
+                    <span className="text-gray-600">Discount</span>
+                    <span className="font-medium text-green-600">-{currency}{order.discount.toFixed(2)}</span>
+                </div>
+            )}
+            <div className="flex justify-between items-center pt-2 border-t mt-2">
+                <span className="font-semibold text-gray-900 text-lg">Total</span>
+                <span className="font-bold text-blue-600 text-xl">{currency}{order.total.toFixed(2)}</span>
+            </div>
           </div>
         </div>
       </div>

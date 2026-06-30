@@ -7,15 +7,11 @@ import { X, Minus, Plus, ShoppingBag } from 'lucide-react'
 import { IRestaurant } from '@/models/Restaurant'
 
 export default function CartDrawer({
-  open,
-  onClose,
   restaurant,
 }: {
-  open: boolean
-  onClose: () => void
   restaurant: IRestaurant
 }) {
-  const { items, removeItem, updateQuantity, total, clearCart } = useCart()
+  const { isCartOpen, closeCart, items, removeItem, updateQuantity, total, clearCart } = useCart()
   const [orderType, setOrderType] = useState<'dine_in' | 'takeaway' | 'delivery'>('dine_in')
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
@@ -73,12 +69,12 @@ export default function CartDrawer({
     }
   }
 
-  if (!open) return null
+  if (!isCartOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 flex">
       {/* Backdrop */}
-      <div className="flex-1 bg-black bg-opacity-50" onClick={onClose} />
+      <div className="flex-1 bg-black bg-opacity-50" onClick={closeCart} />
 
       {/* Drawer */}
       <div className="w-full max-w-md bg-white shadow-xl flex flex-col h-full">
@@ -87,7 +83,7 @@ export default function CartDrawer({
             <ShoppingBag size={20} />
             Your Cart
           </h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
+          <button onClick={closeCart} className="p-1 hover:bg-gray-100 rounded">
             <X size={20} />
           </button>
         </div>
@@ -102,7 +98,7 @@ export default function CartDrawer({
               <p className="text-gray-600 mb-4">Your order number is <strong>#{orderNumber}</strong></p>
               <p className="text-sm text-gray-500">You can track your order in the Orders page.</p>
               <button
-                onClick={() => { setOrderPlaced(false); onClose(); }}
+                onClick={() => { setOrderPlaced(false); closeCart(); }}
                 className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Continue Shopping

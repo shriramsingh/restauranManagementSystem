@@ -31,7 +31,7 @@ export default async function CustomerOrdersPage() {
 
   return (
     <CustomerOrdersClient
-      orders={orders.map((o: any) => ({
+      initialOrders={orders.map((o: any) => ({
         _id: o._id.toString(),
         orderNumber: o.orderNumber,
         status: o.status,
