@@ -4,14 +4,16 @@ import { useState } from 'react'
 import { useCart } from '@/components/customer/CartProvider'
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react'
 
+import { IRestaurant } from '@/models/Restaurant'
+
 export default function CartDrawer({
   open,
   onClose,
-  restaurantId,
+  restaurant,
 }: {
   open: boolean
   onClose: () => void
-  restaurantId: string
+  restaurant: IRestaurant
 }) {
   const { items, removeItem, updateQuantity, total, clearCart } = useCart()
   const [orderType, setOrderType] = useState<'dine_in' | 'takeaway' | 'delivery'>('dine_in')
@@ -21,13 +23,15 @@ export default function CartDrawer({
   const [orderPlaced, setOrderPlaced] = useState(false)
   const [orderNumber, setOrderNumber] = useState('')
 
+  const currency = restaurant.settings?.currency || '₹';
+
   const handlePlaceOrder = async () => {
     if (items.length === 0) return
     setLoading(true)
     setError('')
 
     const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    const tax = subtotal * 0.08 // 8% tax default
+    const tax = subtotal * (restaurant.settings?.taxRate || 0) / 100
     const orderTotal = subtotal + tax
 
     const orderItems = items.map((item) => ({
@@ -43,7 +47,7 @@ export default function CartDrawer({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          restaurantId,
+          restaurantId: restaurant._id,
           orderType,
           items: orderItems,
           subtotal,
@@ -116,7 +120,7 @@ export default function CartDrawer({
                 <div key={item.menuItemId} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <div className="flex-1">
                     <h4 className="font-medium text-gray-900">{item.name}</h4>
-                    <p className="text-sm text-gray-600">${item.price.toFixed(2)} each</p>
+                    <p className="text-sm text-gray-600">{currency}{item.price.toFixed(2)} each</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -135,7 +139,7 @@ export default function CartDrawer({
                   </div>
                   <div className="text-right min-w-[60px]">
                     <p className="font-medium text-gray-900">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {currency}{(item.price * item.quantity).toFixed(2)}
                     </p>
                     <button
                       onClick={() => removeItem(item.menuItemId)}
@@ -190,7 +194,7 @@ export default function CartDrawer({
           <div className="p-4 border-t border-gray-200">
             <div className="flex justify-between items-center mb-2">
               <span className="text-gray-600">Subtotal</span>
-              <span className="font-medium">${total.toFixed(2)}</span>
+              <span className="font-medium">{currency}{total.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center mb-2">
               <span className="text-gray-600">Tax</span>

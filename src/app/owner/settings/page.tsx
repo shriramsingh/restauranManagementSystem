@@ -5,6 +5,8 @@ import Restaurant from '@/models/Restaurant'
 import { Settings } from 'lucide-react'
 import { getRestaurantIdForOwner } from '@/lib/get-restaurant-id'
 
+import OwnerSettingsForm from '@/components/owner/OwnerSettingsForm'
+
 export default async function OwnerSettings() {
   const session = await getServerSession(authOptions)
   const restaurantId = await getRestaurantIdForOwner()
@@ -19,7 +21,7 @@ export default async function OwnerSettings() {
   }
 
   await connectDB()
-  const restaurant = await Restaurant.findById(restaurantId)
+  const restaurant = await Restaurant.findById(restaurantId).lean() as any
 
   if (!restaurant) {
     return (
@@ -30,6 +32,9 @@ export default async function OwnerSettings() {
     )
   }
 
+  // The lean object is serializable and can be passed to the client component.
+  const plainRestaurant = JSON.parse(JSON.stringify(restaurant));
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -38,51 +43,8 @@ export default async function OwnerSettings() {
         <p className="text-gray-600 mt-1">Manage your restaurant profile and settings</p>
       </div>
 
-      {/* Restaurant Info */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Restaurant Information</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Restaurant Name</label>
-            <input
-              type="text"
-              defaultValue={restaurant.name}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-            <input
-              type="email"
-              defaultValue={restaurant.email}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-            <input
-              type="tel"
-              defaultValue={restaurant.phone}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-            <textarea
-              rows={3}
-              defaultValue={restaurant.description}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            Save Changes
-          </button>
-        </div>
-      </div>
+      {/* Restaurant Info Form */}
+      <OwnerSettingsForm restaurant={plainRestaurant} />
 
       {/* Subscription Info */}
       <div className="bg-white rounded-lg shadow p-6">

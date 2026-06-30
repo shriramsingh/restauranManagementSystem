@@ -1,7 +1,7 @@
 'use client'
 
 import { useCart } from '@/components/customer/CartProvider'
-import { UtensilsCrossed } from 'lucide-react'
+import { UtensilsCrossed, Minus, Plus, Trash2, Star } from 'lucide-react'
 
 interface MenuItem {
   _id: string
@@ -11,13 +11,14 @@ interface MenuItem {
   isVegetarian?: boolean
   isVegan?: boolean
   isGlutenFree?: boolean
+  isFeatured?: boolean
   spiceLevel?: string
   preparationTime?: number
   images?: string[]
 }
 
-export default function MenuItemCard({ item }: { item: MenuItem }) {
-  const { addItem, items } = useCart()
+export default function MenuItemCard({ item, currency }: { item: MenuItem, currency: string }) {
+  const { addItem, updateQuantity, items } = useCart()
   const inCart = items.find((i) => i.menuItemId === item._id)
 
   const handleAdd = () => {
@@ -29,8 +30,14 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+    <div className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
+      <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+        {item.isFeatured && (
+          <div className="absolute top-2 right-2 bg-yellow-400 text-gray-900 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+            <Star size={12} />
+            Featured
+          </div>
+        )}
         {item.images && item.images.length > 0 ? (
           <img
             src={item.images[0]}
@@ -42,10 +49,10 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
         )}
       </div>
 
-      <div className="p-4">
+      <div className="p-4 flex-1 flex flex-col">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
-          <span className="text-lg font-bold text-blue-600">${item.price.toFixed(2)}</span>
+          <span className="text-lg font-bold text-blue-600">{currency}{item.price.toFixed(2)}</span>
         </div>
 
         {item.description && (
@@ -70,17 +77,35 @@ export default function MenuItemCard({ item }: { item: MenuItem }) {
         {item.preparationTime && (
           <p className="text-sm text-gray-500 mb-3">{item.preparationTime} mins prep</p>
         )}
-
-        <button
-          onClick={handleAdd}
-          className={`w-full py-2 rounded-lg transition-colors ${
-            inCart
-              ? 'bg-green-600 text-white hover:bg-green-700'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-          }`}
-        >
-          {inCart ? `Added (${inCart.quantity})` : 'Add to Order'}
-        </button>
+        
+        <div className="mt-auto">
+          {inCart ? (
+            <div className="flex items-center justify-between w-full">
+              <button
+                onClick={() => updateQuantity(item._id, inCart.quantity - 1)}
+                className="bg-gray-200 text-gray-700 hover:bg-gray-300 w-10 h-10 rounded-full transition-colors flex items-center justify-center"
+                aria-label="Remove one item"
+              >
+                {inCart.quantity === 1 ? <Trash2 size={16} /> : <Minus size={16} />}
+              </button>
+              <span className="font-bold text-lg">{inCart.quantity}</span>
+              <button
+                onClick={() => updateQuantity(item._id, inCart.quantity + 1)}
+                className="bg-gray-200 text-gray-700 hover:bg-gray-300 w-10 h-10 rounded-full transition-colors flex items-center justify-center"
+                aria-label="Add one item"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleAdd}
+              className="w-full py-2 rounded-lg transition-colors bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Add to Order
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

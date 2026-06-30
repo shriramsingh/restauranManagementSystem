@@ -116,6 +116,61 @@ export async function PUT(
   }
 }
 
+// PATCH /api/restaurants/[id] — Partially update a restaurant
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await connectDB()
+    const session = await getServerSession(authOptions)
+    const body = await request.json()
+
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const restaurant = await Restaurant.findById(params.id)
+    if (!restaurant) {
+      return NextResponse.json({ error: 'Restaurant not found' }, { status: 404 })
+    }
+
+    // Authorize: only super_admin or the restaurant owner can update
+    const isOwner = restaurant.ownerId.toString() === session.user.id
+    if (session.user.role !== 'super_admin' && !isOwner) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const validation = UpdateRestaurantSchema.safeParse(body)
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          details: validation.error.flatten(),
+        },
+        { status: 400 }
+      )
+    }
+
+    const updatedRestaurant = await Restaurant.findByIdAndUpdate(
+      params.id,
+      { $set: validation.data },
+      { new: true }
+    )
+
+    return NextResponse.json(updatedRestaurant)
+  } catch (error: any) {
+    console.error('Error updating restaurant:', error)
+    return NextResponse.json(
+      {
+        error: 'Failed to update restaurant',
+        details: error.message,
+      },
+      { status: 500 }
+    )
+  }
+}
+
 // DELETE /api/restaurants/[id] — Delete a restaurant
 export async function DELETE(
   request: NextRequest,

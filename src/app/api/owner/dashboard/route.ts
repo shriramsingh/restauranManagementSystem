@@ -6,6 +6,7 @@ import connectDB from '@/lib/mongodb'
 import Order from '@/models/Order'
 import MenuItem from '@/models/MenuItem'
 import Table from '@/models/Table'
+import Restaurant from '@/models/Restaurant'
 import { getRestaurantIdForOwner } from '@/lib/get-restaurant-id'
 import { z } from 'zod'
 
@@ -20,6 +21,9 @@ async function getOwnerStats(
   endDate: Date,
 ) {
   await connectDB()
+
+  const restaurant = await Restaurant.findById(restaurantId).select('settings.currency')
+  const currency = restaurant?.settings?.currency || 'USD'
 
   const matchConditions = {
     restaurantId: new mongoose.Types.ObjectId(restaurantId),
@@ -96,6 +100,7 @@ async function getOwnerStats(
     chartOrders,
     orderTrend,
     revenueTrend,
+    currency,
   }
 }
 

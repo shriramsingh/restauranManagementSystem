@@ -13,7 +13,13 @@ import {
 } from 'recharts'
 import { format, eachDayOfInterval, startOfDay } from 'date-fns'
 
-export default function RevenueAreaChart({ orders }: { orders: any[] }) {
+export default function RevenueAreaChart({
+  orders,
+  currency = '$',
+}: {
+  orders: any[]
+  currency?: string
+}) {
   const { chartData, range } = useMemo(() => {
     if (!orders.length) return { chartData: [], range: { min: 0, max: 0 } }
 
@@ -83,12 +89,12 @@ export default function RevenueAreaChart({ orders }: { orders: any[] }) {
           <XAxis dataKey="name" tick={{ fontSize: 12 }} />
           <YAxis
             tick={{ fontSize: 12 }}
-            tickFormatter={(v: number) => `$${v}`}
+            tickFormatter={(v: number) => `${currency}${v}`}
             domain={[range.min, range.max]}
           />
           <Tooltip
             formatter={(value: number, name: string) => [
-              `$${value.toFixed(2)}`,
+              `${currency}${value.toFixed(2)}`,
               name.charAt(0).toUpperCase() + name.slice(1)
             ]}
             contentStyle={{ borderRadius: 8, border: '1px solid #E5E7EB', fontSize: 14 }}

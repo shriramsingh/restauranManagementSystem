@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+const CURRENCY_OPTIONS = ['₹', '$', '€', '£'];
+
 export default function EditRestaurant({ params }: { params: { id: string } }) {
   const [formData, setFormData] = useState({
     name: '',
@@ -16,6 +18,7 @@ export default function EditRestaurant({ params }: { params: { id: string } }) {
     country: '',
     description: '',
     cuisine: '',
+    currency: '₹', // Add currency to state
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -41,6 +44,7 @@ export default function EditRestaurant({ params }: { params: { id: string } }) {
             country: data.address?.country || '',
             description: data.description || '',
             cuisine: data.cuisine?.join(', ') || '',
+            currency: data.settings?.currency || '₹', // Populate currency
           })
         }
         setLoading(false)
@@ -58,12 +62,15 @@ export default function EditRestaurant({ params }: { params: { id: string } }) {
 
     try {
       const response = await fetch(`/api/restaurants/${params.id}`, {
-        method: 'PUT',
+        method: 'PATCH', // Use PATCH for partial updates
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          description: formData.description,
           cuisine: formData.cuisine.split(',').map(c => c.trim()),
           address: {
             street: formData.street,
@@ -71,6 +78,9 @@ export default function EditRestaurant({ params }: { params: { id: string } }) {
             state: formData.state,
             zipCode: formData.zipCode,
             country: formData.country,
+          },
+          settings: {
+            currency: formData.currency, // Send nested settings object
           }
         }),
       })
@@ -231,6 +241,26 @@ export default function EditRestaurant({ params }: { params: { id: string } }) {
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Settings</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-2">Currency Symbol</label>
+                <select
+                  id="currency"
+                  name="currency"
+                  value={formData.currency}
+                  onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {CURRENCY_OPTIONS.map(option => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

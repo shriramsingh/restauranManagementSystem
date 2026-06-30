@@ -35,6 +35,7 @@ interface DashboardData {
   chartOrders: any[]
   orderTrend: { change: number; trend: 'up' | 'down' | 'flat' }
   revenueTrend: { change: number; trend: 'up' | 'down' | 'flat' }
+  currency: string
 }
 
 const getStatCards = (data: DashboardData) => [
@@ -48,7 +49,7 @@ const getStatCards = (data: DashboardData) => [
   },
   {
     title: 'Total Revenue',
-    value: `$${data.totalRevenue.toFixed(2)}`,
+    value: `${data.currency} ${data.totalRevenue.toFixed(2)}`,
     icon: DollarSign,
     color: 'bg-green-500',
     change: formatChange(data.revenueTrend.change, data.revenueTrend.trend),
@@ -56,7 +57,7 @@ const getStatCards = (data: DashboardData) => [
   },
   {
     title: 'Total Refunds',
-    value: `$${data.totalRefunded.toFixed(2)}`,
+    value: `${data.currency} ${data.totalRefunded.toFixed(2)}`,
     icon: TrendingDown,
     color: 'bg-red-500',
     change: null,
@@ -180,7 +181,6 @@ export default function OwnerDashboard() {
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
               <Calendar
-                initialFocus
                 mode="range"
                 defaultMonth={date?.from}
                 selected={date}
@@ -231,7 +231,7 @@ export default function OwnerDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue</h3>
-          <RevenueAreaChart orders={data.chartOrders} />
+          <RevenueAreaChart orders={data.chartOrders} currency={data.currency} />
         </div>
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Status</h3>

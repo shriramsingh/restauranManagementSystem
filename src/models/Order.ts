@@ -9,7 +9,7 @@ export interface IOrder extends Document {
   customerEmail?: string
   tableId?: mongoose.Types.ObjectId
   orderType: 'dine_in' | 'takeaway' | 'delivery'
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled'
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled' | 'out_for_delivery' | 'delivered'
   items: {
     menuItemId: mongoose.Types.ObjectId
     name: string
@@ -72,7 +72,7 @@ const OrderSchema = new Schema<IOrder>({
   },
   status: {
     type: String,
-    enum: ['pending', 'confirmed', 'preparing', 'ready', 'served', 'completed', 'cancelled'],
+    enum: ['pending', 'confirmed', 'preparing', 'ready', 'served', 'completed', 'cancelled', 'out_for_delivery', 'delivered'],
     default: 'pending',
   },
   items: [{

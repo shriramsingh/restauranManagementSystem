@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Order from '@/models/Order'
+import Restaurant from '@/models/Restaurant'
 import { getRestaurantIdForOwner } from '@/lib/get-restaurant-id'
 import { z } from 'zod'
 
@@ -20,6 +21,9 @@ async function getReportsData(
   endDate: Date,
 ) {
   await connectDB()
+
+  const restaurant = await Restaurant.findById(restaurantId).select('settings.currency')
+  const currency = restaurant?.settings?.currency || 'USD'
 
   const matchConditions = {
     restaurantId: new mongoose.Types.ObjectId(restaurantId),
@@ -105,6 +109,7 @@ async function getReportsData(
     ordersByHour,
     ordersByStatus,
     dailyRevenue,
+    currency,
   }
 }
 

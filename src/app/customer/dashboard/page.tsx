@@ -2,6 +2,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import connectDB from '@/lib/mongodb'
 import Order from '@/models/Order'
+import Restaurant from '@/models/Restaurant' // Import the Restaurant model
+import User from '@/models/User' // Import the User model
 import { 
   ShoppingCart, 
   Clock,
@@ -9,8 +11,10 @@ import {
   UtensilsCrossed
 } from 'lucide-react'
 import OrderStatusPieChart from '@/components/charts/OrderStatusPieChart'
+import FormattedDate from '@/components/customer/FormattedDate'
+import Link from 'next/link'
 
-async function getCustomerStats(customerId: string) {
+async function getCustomerStats(customerId: string, restaurantId: string) {
   await connectDB()
   
   const totalOrders = await Order.countDocuments({ customerId })
@@ -27,11 +31,14 @@ async function getCustomerStats(customerId: string) {
     .sort({ createdAt: -1 })
     .limit(50)
 
+  const restaurant = await Restaurant.findById(restaurantId).select('settings.currency').lean();
+
   return {
     totalOrders,
     pendingOrders,
     completedOrders,
     recentOrders,
+    currency: restaurant?.settings?.currency || '$'
   }
 }
 
@@ -42,7 +49,7 @@ export default async function CustomerDashboard() {
     return <div>Please sign in</div>
   }
 
-  const stats = await getCustomerStats(session.user.id)
+  const stats = await getCustomerStats(session.user.id, session.user.restaurantId)
 
   const statCards = [
     {
@@ -171,7 +178,9 @@ export default async function CustomerDashboard() {
                 {stats.recentOrders.slice(0, 10).map((order: any) => (
                   <tr key={order._id.toString()} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      #{order.orderNumber}
+                      <Link href={`/customer/orders/${order._id.toString()}`} className="text-blue-600 hover:underline">
+                        #{order.orderNumber}
+                      </Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
                       {order.orderType.replace('_', ' ')}
@@ -187,10 +196,10 @@ export default async function CustomerDashboard() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${order.total.toFixed(2)}
+                      {stats.currency}{order.total.toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                      <FormattedDate date={order.createdAt} />
                     </td>
                   </tr>
                 ))}

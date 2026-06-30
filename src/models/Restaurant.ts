@@ -121,7 +121,7 @@ const RestaurantSchema = new Schema<IRestaurant>({
     default: true,
   },
   settings: {
-    currency: { type: String, default: 'USD' },
+    currency: { type: String, default: '₹' },
     taxRate: { type: Number, default: 0 },
     allowOnlineOrders: { type: Boolean, default: true },
     allowTableReservation: { type: Boolean, default: true },

@@ -35,6 +35,7 @@ interface ReportData {
   ordersByHour: { _id: number; count: number; revenue: number }[]
   ordersByStatus: { _id: string; count: number; revenue: number }[]
   dailyRevenue: { _id: string; revenue: number; count: number }[]
+  currency: string
 }
 
 const statusColors: Record<string, string> = {
@@ -116,6 +117,8 @@ export default function OwnerReportsClient() {
     dailyRevenue,
   } = data
 
+  const currency = data.currency || 'USD'
+
   const hourlyData = Array.from({ length: 24 }, (_, i) => {
     const found = ordersByHour.find(h => h._id === i)
     return {
@@ -179,7 +182,6 @@ export default function OwnerReportsClient() {
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
               <Calendar
-                initialFocus
                 mode="range"
                 defaultMonth={date?.from}
                 selected={date}
@@ -198,7 +200,7 @@ export default function OwnerReportsClient() {
             <div>
               <p className="text-sm text-gray-600 mb-1">Total Revenue</p>
               <p className="text-2xl font-bold text-gray-900">
-                ${(revenue.total || 0).toFixed(2)}
+                {currency} {(revenue.total || 0).toFixed(2)}
               </p>
               <p className="text-sm text-gray-500 mt-1">{revenue.count || 0} orders</p>
             </div>
@@ -212,7 +214,7 @@ export default function OwnerReportsClient() {
             <div>
               <p className="text-sm text-gray-600 mb-1">Refunds</p>
               <p className="text-2xl font-bold text-gray-900">
-                ${(totalRefunded.total || 0).toFixed(2)}
+                {currency} {(totalRefunded.total || 0).toFixed(2)}
               </p>
                <p className="text-sm text-gray-500 mt-1">{totalRefunded.count || 0} refunds</p>
             </div>
@@ -235,9 +237,9 @@ export default function OwnerReportsClient() {
               <XAxis dataKey="date" tick={{ fontSize: 12 }} />
               <YAxis
                 tick={{ fontSize: 12 }}
-                tickFormatter={(v: number) => `$${v}`}
+                tickFormatter={(v: number) => `${currency} ${v}`}
               />
-              <Tooltip formatter={(v: number) => [`$${v.toFixed(2)}`, 'Revenue']} />
+              <Tooltip formatter={(v: number) => [`${currency} ${v.toFixed(2)}`, 'Revenue']} />
               <Line
                 type="monotone"
                 dataKey="revenue"
@@ -274,7 +276,7 @@ export default function OwnerReportsClient() {
                     </p>
                   </div>
                   <p className="font-bold text-gray-900">
-                    ${item.revenue.toFixed(2)}
+                    {currency} {item.revenue.toFixed(2)}
                   </p>
                 </div>
               ))

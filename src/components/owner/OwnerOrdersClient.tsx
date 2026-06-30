@@ -53,11 +53,11 @@ const statusColors: Record<string, string> = {
 const paymentStatusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
   paid: 'bg-green-100 text-green-800',
-  refunded: 'bg-gray-100 text-gray-800',
+  refunded: 'bg-ray-100 text-gray-800',
   failed: 'bg-red-100 text-red-800',
 }
 
-export default function OwnerOrdersClient({ initialOrders }: { initialOrders: Order[] }) {
+export default function OwnerOrdersClient({ initialOrders, currency }: { initialOrders: Order[], currency: string }) {
   const [orders, setOrders] = useState<Order[]>(initialOrders)
   const [filterStatus, setFilterStatus] = useState('')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
@@ -205,7 +205,7 @@ export default function OwnerOrdersClient({ initialOrders }: { initialOrders: Or
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${order.total.toFixed(2)}
+                      {currency}{order.total.toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${paymentStatusColors[order.paymentStatus] || 'bg-gray-100 text-gray-800'}`}>
@@ -268,12 +268,12 @@ export default function OwnerOrdersClient({ initialOrders }: { initialOrders: Or
                     <div key={idx} className="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
                       <div>
                         <p className="font-medium text-gray-900">{item.name}</p>
-                        <p className="text-sm text-gray-600">{item.quantity} x ${item.price.toFixed(2)}</p>
+                        <p className="text-sm text-gray-600">{item.quantity} x {currency}{item.price.toFixed(2)}</p>
                         {item.specialInstructions && (
                           <p className="text-xs text-gray-500 mt-1">Note: {item.specialInstructions}</p>
                         )}
                       </div>
-                      <p className="font-medium text-gray-900">${item.total.toFixed(2)}</p>
+                      <p className="font-medium text-gray-900">{currency}{item.total.toFixed(2)}</p>
                     </div>
                   ))}
                 </div>
@@ -283,21 +283,21 @@ export default function OwnerOrdersClient({ initialOrders }: { initialOrders: Or
               <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="text-gray-900">${selectedOrder.subtotal.toFixed(2)}</span>
+                  <span className="text-gray-900">{currency}{selectedOrder.subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Tax</span>
-                  <span className="text-gray-900">${(selectedOrder.tax || 0).toFixed(2)}</span>
+                  <span className="text-gray-900">{currency}{(selectedOrder.tax || 0).toFixed(2)}</span>
                 </div>
                 {selectedOrder.discount > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Discount</span>
-                    <span className="text-green-600">-${selectedOrder.discount.toFixed(2)}</span>
+                    <span className="text-green-600">-{currency}{selectedOrder.discount.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-2">
                   <span className="text-gray-900">Total</span>
-                  <span className="text-gray-900">${selectedOrder.total.toFixed(2)}</span>
+                  <span className="text-gray-900">{currency}{selectedOrder.total.toFixed(2)}</span>
                 </div>
               </div>
 

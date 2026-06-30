@@ -25,9 +25,11 @@ interface MenuItem {
 export default function OwnerMenuManager({
   initialCategories,
   initialItems,
+  currency,
 }: {
   initialCategories: Category[]
   initialItems: MenuItem[]
+  currency: string
 }) {
   const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [items, setItems] = useState<MenuItem[]>(initialItems)
@@ -291,7 +293,7 @@ export default function OwnerMenuManager({
                             </div>
                           </div>
                           <div className="text-right flex items-center gap-3">
-                            <p className="text-lg font-bold text-gray-900">${item.price.toFixed(2)}</p>
+                            <p className="text-lg font-bold text-gray-900">{currency}{item.price.toFixed(2)}</p>
                             <button
                               onClick={() => openEditItem(item)}
                               className="text-blue-600 hover:text-blue-700"
@@ -390,7 +392,7 @@ export default function OwnerMenuManager({
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price ({currency})</label>
                   <input
                     type="number"
                     step="0.01"
